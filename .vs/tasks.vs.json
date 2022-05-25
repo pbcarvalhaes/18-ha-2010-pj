@@ -1,0 +1,10 @@
+{
+  "version": "0.2.1",
+  "tasks": [
+    {
+      "taskLabel": "tarefa-18-ha-2010-pj",
+      "appliesTo": "/",
+      "type": "launch"
+    }
+  ]
+}
