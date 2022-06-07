@@ -79,7 +79,7 @@ def predict_labels(ecg_leads: List[np.ndarray], fs: float, ecg_names: List[str],
     encoder = LabelEncoder()
     encoder.classes_ = np.load('encoder.npy', allow_pickle=True)
 
-    y_pred = model.predict(df[df.columns[:-1]])
+    y_pred = model.predict(df)
     y_pred = encoder.inverse_transform(y_pred)
     predictions = []
     counter = 0
