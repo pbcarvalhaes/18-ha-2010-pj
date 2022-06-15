@@ -35,8 +35,8 @@ def main():
     labelsN=np.full(len(arrN),'N')
     labelsAN=np.full(len(arrAN),'X')
 
-    arr= np.append(arrN,arrAN)
-    labels= np.append(labelsN,labelsAN)
+    arr= np.append(arrN,arrAN, axis=0)
+    labels= np.append(labelsN,labelsAN, axis=0)
 
     np.save(dataPath+'ecgLeads.npy',arr)
     np.save(dataPath+'ecgLabels.npy',labels)
