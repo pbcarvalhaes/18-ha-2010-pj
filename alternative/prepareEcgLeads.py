@@ -2,8 +2,10 @@ from cProfile import label
 from typing import List, Tuple
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import scale
 
 dataPath = "alternative/data/"
+scale = 1000
 
 def removeZeroPadding(arr: np.ndarray):
     for row in arr:
@@ -47,6 +49,7 @@ def main():
     arr= np.append(arrN,arrAN, axis=0)
     labels= np.append(labelsN,labelsAN, axis=0)
 
+    arr = arr*scale
     np.save(dataPath+'ecgLeads.npy',arr)
     np.save(dataPath+'ecgLabels.npy',labels)
 
