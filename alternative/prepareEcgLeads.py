@@ -22,6 +22,15 @@ def load_references(folder: str = dataPath) -> Tuple[np.ndarray, np.ndarray]:
 
     return (arr,labels)
 
+def load_alternative_encoder() -> np.ndarray:
+    encoderModel = np.load('encoder.npy', allow_pickle=True)
+
+    encoder = np.copy(encoderModel)
+
+    for i in range(1, len(encoderModel)):
+        encoder[i] = 'X'
+    
+    return encoder
 
 def main():
     # loading arrats from csv
