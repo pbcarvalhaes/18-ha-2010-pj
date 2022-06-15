@@ -23,19 +23,23 @@ def load_references(folder: str = dataPath) -> Tuple[np.ndarray, np.ndarray]:
     return (arr,labels)
 
 
-# loading arrats from csv
-arrN = np.genfromtxt(dataPath+'ptbdb_normal.csv', delimiter=',')
-arrAN = np.genfromtxt(dataPath+'ptbdb_abnormal.csv', delimiter=',')
+def main():
+    # loading arrats from csv
+    arrN = np.genfromtxt(dataPath+'ptbdb_normal.csv', delimiter=',')
+    arrAN = np.genfromtxt(dataPath+'ptbdb_abnormal.csv', delimiter=',')
 
-# removing zero padding, by adding the beginning until the end
-removeZeroPadding(arrN)
-removeZeroPadding(arrAN)
+    # removing zero padding, by adding the beginning until the end
+    removeZeroPadding(arrN)
+    removeZeroPadding(arrAN)
 
-labelsN=np.full(len(arrN),'N')
-labelsAN=np.full(len(arrAN),'X')
+    labelsN=np.full(len(arrN),'N')
+    labelsAN=np.full(len(arrAN),'X')
 
-arr= np.append(arrN,arrAN)
-labels= np.append(labelsN,labelsAN)
+    arr= np.append(arrN,arrAN)
+    labels= np.append(labelsN,labelsAN)
 
-np.save(dataPath+'ecgLeads.npy',arr)
-np.save(dataPath+'ecgLabels.npy',labels)
+    np.save(dataPath+'ecgLeads.npy',arr)
+    np.save(dataPath+'ecgLabels.npy',labels)
+
+if __name__ == '__main__':
+    main()
