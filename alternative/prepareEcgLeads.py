@@ -3,6 +3,10 @@ from typing import List, Tuple
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import scale
+from os import listdir
+from os.path import isfile, join
+import scipy.io as sio
+
 
 dataPath = "alternative/data/"
 scale = 1000
@@ -30,27 +34,39 @@ def load_alternative_encoder() -> np.ndarray:
     encoder = np.copy(encoderModel)
 
     for i in range(1, len(encoderModel)):
-        encoder[i] = 'X'
+        encoder[i] = 'A'
     
     return encoder
 
-def main():
+def matFiles2Array(path: str, label: str):
     # loading arrats from csv
-    arrN = np.genfromtxt(dataPath+'ptbdb_normal.csv', delimiter=',')
-    arrAN = np.genfromtxt(dataPath+'ptbdb_abnormal.csv', delimiter=',')
+    fileNames = [f for f in listdir(path) if isfile(join(path, f))]
 
-    # removing zero padding, by adding the beginning until the end
-    removeZeroPadding(arrN)
-    removeZeroPadding(arrAN)
 
-    labelsN=np.full(len(arrN),'N')
-    labelsAN=np.full(len(arrAN),'X')
+    data = sio.loadmat(path + fileNames[0])
+    ecg_lead = data['sample']
 
-    arr= np.append(arrN,arrAN, axis=0)
-    labels= np.append(labelsN,labelsAN, axis=0)
+    leads = np.zeros((len(fileNames),len(ecg_lead)))
+    labels=np.full(len(fileNames),label)
 
-    arr = arr*scale
-    np.save(dataPath+'ecgLeads.npy',arr)
+    counter = 0
+    for file in fileNames:
+        data = sio.loadmat(path + file)
+        ecg_lead = data['sample']
+        leads[counter]=ecg_lead
+        counter+=1
+
+    return(leads,labels)
+
+def main():
+    norm = matFiles2Array('alternative/normal/', "N")
+    arr = matFiles2Array('alternative/arrhythmia/', "A")
+
+
+    leads= np.append(norm[0],arr[0], axis=0)
+    labels= np.append(norm[1],arr[1], axis=0)
+
+    np.save(dataPath+'ecgLeads.npy',leads)
     np.save(dataPath+'ecgLabels.npy',labels)
 
 if __name__ == '__main__':
