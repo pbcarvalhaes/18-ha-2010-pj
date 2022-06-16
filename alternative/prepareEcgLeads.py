@@ -22,9 +22,15 @@ def removeZeroPadding(arr: np.ndarray):
             row[j]=row[copyIndex]
             copyIndex+=1
 
-def load_references(folder: str = dataPath) -> Tuple[np.ndarray, np.ndarray]:
-    arr = np.load(folder+'ecgLeads.npy')
-    labels = np.load(folder+'ecgLabels.npy')
+def load_references_normal(folder: str = dataPath) -> Tuple[np.ndarray, np.ndarray]:
+    arr = np.load(folder+'ecgLeadsNormal.npy')
+    labels = np.load(folder+'ecgLabelsNormal.npy')
+
+    return (arr,labels)
+
+def load_references_arrhythmia(folder: str = dataPath) -> Tuple[np.ndarray, np.ndarray]:
+    arr = np.load(folder+'ecgLeadsArrhythmia.npy')
+    labels = np.load(folder+'ecgLabelsArrhythmia.npy')
 
     return (arr,labels)
 
@@ -53,7 +59,7 @@ def matFiles2Array(path: str, label: str):
     for file in fileNames:
         data = sio.loadmat(path + file)
         ecg_lead = data['sample']
-        leads[counter]=ecg_lead
+        leads[counter]=ecg_lead.flatten()
         counter+=1
 
     return(leads,labels)
@@ -63,11 +69,13 @@ def main():
     arr = matFiles2Array('alternative/arrhythmia/', "A")
 
 
-    leads= np.append(norm[0],arr[0], axis=0)
-    labels= np.append(norm[1],arr[1], axis=0)
+    # leads= np.append(norm[0],arr[0], axis=0)
+    # labels= np.append(norm[1],arr[1], axis=0)
 
-    np.save(dataPath+'ecgLeads.npy',leads)
-    np.save(dataPath+'ecgLabels.npy',labels)
+    np.save(dataPath+'ecgLeadsNormal.npy',norm[0])
+    np.save(dataPath+'ecgLabelsNormal.npy',norm[1])
+    np.save(dataPath+'ecgLeadsArrhythmia.npy',arr[0])
+    np.save(dataPath+'ecgLabelsArrhythmia.npy',arr[1])
 
 if __name__ == '__main__':
     main()
