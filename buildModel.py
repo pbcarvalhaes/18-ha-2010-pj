@@ -1,3 +1,4 @@
+from sklearn import metrics
 from wettbewerb import load_references
 from ecgdetectors import Detectors
 import numpy as np
@@ -80,12 +81,18 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,random_s
 clf = RandomForestClassifier(n_estimators=28,max_depth=25,bootstrap=True,min_samples_leaf=1, class_weight="balanced")
 clf.fit(X_train,y_train)
 y_pred = clf.predict(X_test)
+print("RF Hyperparameter selected ")
+print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+print("F1:",metrics.f1_score(y_test, y_pred, average='weighted'))
 pickle.dump(clf, open('RF_model.pkl', 'wb'))
 
 # RandomForest model
 clf = RandomForestClassifier()
 clf.fit(X_train,y_train)
 y_pred = clf.predict(X_test)
+print("RF")
+print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+print("F1:",metrics.f1_score(y_test, y_pred, average='weighted'))
 pickle.dump(clf, open('RF_model2.pkl', 'wb'))
 
 # XGB model
@@ -95,13 +102,16 @@ np.save('encoder.npy', encoder.classes_)
 model = xgb.XGBClassifier(max_depth=8, learning_rate=0.1, n_estimators=5)
 model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
+print("XGB hyperparamter selected")
+print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+print("F1:",metrics.f1_score(y_test, y_pred, average='weighted'))
 model.save_model('XGB_model.txt')
 
 # XGB model
-encoder = LabelEncoder()
-y_train = encoder.fit_transform(y_train)
-np.save('encoder.npy', encoder.classes_)
 model = xgb.XGBClassifier()
 model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
+print("XGB")
+print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+print("F1:",metrics.f1_score(y_test, y_pred, average='weighted'))
 model.save_model('XGB_model2.txt')
