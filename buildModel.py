@@ -56,7 +56,7 @@ for idx, ecg_lead in enumerate(ecg_leads):
     arr[idx][5] = NN50_swt  
     
     diagnosis[idx] = ecg_labels[idx]
-    if (idx % 100) == 0:
+    if (idx % 1000) == 0:
         print(str(idx) + "\t EKG Signale wurden verarbeitet.")
 
 # Save data with pandas
@@ -82,6 +82,12 @@ clf.fit(X_train,y_train)
 y_pred = clf.predict(X_test)
 pickle.dump(clf, open('RF_model.pkl', 'wb'))
 
+# RandomForest model
+clf = RandomForestClassifier()
+clf.fit(X_train,y_train)
+y_pred = clf.predict(X_test)
+pickle.dump(clf, open('RF_model2.pkl', 'wb'))
+
 # XGB model
 encoder = LabelEncoder()
 y_train = encoder.fit_transform(y_train)
@@ -90,3 +96,12 @@ model = xgb.XGBClassifier(max_depth=8, learning_rate=0.1, n_estimators=5)
 model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
 model.save_model('XGB_model.txt')
+
+# XGB model
+encoder = LabelEncoder()
+y_train = encoder.fit_transform(y_train)
+np.save('encoder.npy', encoder.classes_)
+model = xgb.XGBClassifier()
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+model.save_model('XGB_model2.txt')
