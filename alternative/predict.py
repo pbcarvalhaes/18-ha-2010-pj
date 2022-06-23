@@ -85,6 +85,7 @@ def printScore(y_pred, modelName:str = "No model Explicited"):
     print("--- %s seconds ---" % (time.time() - start_time))
 
 def testXGBmodel(df, modelfilepath:str, modelName:str = "No XGB model Explicited"):
+    start_time = time.time()
     model = xgb.XGBClassifier()
     model.load_model(modelfilepath)
 
@@ -97,6 +98,7 @@ def testXGBmodel(df, modelfilepath:str, modelName:str = "No XGB model Explicited
     printScore(y_pred, modelName)
 
 def testRFmodel(df, modelfilepath:str, modelName:str = "No XGB model Explicited"):
+    start_time = time.time()
     model = RandomForestClassifier()
     model = pickle.load(open(modelfilepath, 'rb'))
 
@@ -123,6 +125,8 @@ del df1
 gc.collect()
 
 
+# df = pd.read_csv('alternative/data/featuresCsv.csv')
+
 print("---Data prep %s seconds ---" % (time.time() - start_time))
 #   End Data Preparation
 #   -----------------------------------------------------------------------------------------
@@ -131,5 +135,5 @@ start_time = time.time()
 
 testXGBmodel(df,modelfilepath="models/XGB_model.txt", modelName="XGB hyperparameter selected")
 testXGBmodel(df,modelfilepath="models/XGB_model2.txt", modelName="XGB no hyperparameter selected")
-testRFmodel(df,modelfilepath="models/RF_model.txt", modelName="RF hyperparameter selected")
-testRFmodel(df,modelfilepath="models/RF_model2.txt", modelName="RF no hyperparameter selected")
+testRFmodel(df,modelfilepath="models/RF_model.pkl", modelName="RF hyperparameter selected")
+testRFmodel(df,modelfilepath="models/RF_model2.pkl", modelName="RF no hyperparameter selected")
