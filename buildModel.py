@@ -55,14 +55,7 @@ for idx, ecg_lead in enumerate(ecg_leads):
     arr[idx][4] = NN20_swt
     arr[idx][5] = NN50_swt  
     
-    if ecg_labels[idx] == 'N':
-        diagnosis[idx] = 'N'
-    if ecg_labels[idx] == 'A':
-        diagnosis[idx] = 'A'
-    if ecg_labels[idx] == 'O':
-        diagnosis[idx] = 'O'
-    if ecg_labels[idx] == '~':
-        diagnosis[idx] = '~'
+    diagnosis[idx] = ecg_labels[idx]
     if (idx % 100) == 0:
         print(str(idx) + "\t EKG Signale wurden verarbeitet.")
 
