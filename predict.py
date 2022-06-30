@@ -80,7 +80,7 @@ def predict_labels(ecg_leads: List[np.ndarray], fs: float, ecg_names: List[str],
 
     fs = 300                                                  # Sampling-Frequenz 300 Hz
     detectors = Detectors(fs)                                 # Initialisierung des QRS-Detektors
-    detections = np.zeros((len(ecg_leads),6))
+    detections = np.zeros((len(ecg_leads),8))
 
     
     # Signale verarbeitung
@@ -109,6 +109,9 @@ def predict_labels(ecg_leads: List[np.ndarray], fs: float, ecg_names: List[str],
         sdsd_swt = hrv_class.SDSD(r_peaks_swt)
         NN20_swt = hrv_class.NN20(r_peaks_swt)
         NN50_swt = hrv_class.NN50(r_peaks_swt)
+        HR_swt_mean = np.mean(hrv_class.HR(r_peaks_swt))
+        succ_diffs_mean = np.mean(hrv_class._succ_diffs(r_peaks_swt))
+        
 
     #   fAnalysis_swt
         detections[idx][0] = idx
@@ -116,14 +119,16 @@ def predict_labels(ecg_leads: List[np.ndarray], fs: float, ecg_names: List[str],
         detections[idx][2] = rmssd_swt
         detections[idx][3] = sdsd_swt
         detections[idx][4] = NN20_swt
-        detections[idx][5] = NN50_swt  
+        detections[idx][5] = NN50_swt
+        detections[idx][6] = HR_swt_mean
+        detections[idx][7] = succ_diffs_mean
         
         diagnosis[idx] = ecg_labels[idx]
         if (idx % 1000) == 0:
             print(str(idx) + "\t EKG Signale wurden verarbeitet.")
 
     # Save data with pandas
-    df = pd.DataFrame(detections, columns = ['index', 'SDNN', 'RMSSD', 'SDSD', 'NN20', 'NN50'])
+    df = pd.DataFrame(detections, columns = ['index', 'SDNN', 'RMSSD', 'SDSD', 'NN20', 'NN50', 'HR mean', 'SD mean'])
     df.drop(['index'],axis=1, inplace = True)
     df.rename(columns = {'level_0':'index'}, inplace = True)
     df['diagnosis'] = diagnosis
