@@ -8,6 +8,7 @@ Skript testet das vortrainierte Modell
 """
 
 import csv
+import pickle
 import scipy.io as sio
 import matplotlib.pyplot as plt
 import numpy as np
@@ -19,7 +20,6 @@ import xgboost as xgb
 from sklearn.ensemble import RandomForestClassifier
 from hrv import HRV
 from sklearn.preprocessing import LabelEncoder
-from imblearn.over_sampling import SMOTE
 
 
 # Signatur der Methode (Parameter und Anzahl return-Werte) darf nicht verändert werden
@@ -132,10 +132,10 @@ def predict_labels(ecg_leads: List[np.ndarray], fs: float, ecg_names: List[str],
             counter += 1
     elif model_name == "RF_model.pkl" or model_name =="RF_model2.pkl":
         model = RandomForestClassifier()
-        model.load_model(path)
+        model = pickle.load(open(path, 'rb'))
+
 
         y_pred = model.predict(df)
-        y_pred = encoder.inverse_transform(y_pred)
         predictions = []
         counter = 0
         for row in y_pred:
