@@ -14,21 +14,13 @@ from ecgdetectors import Detectors
 
 
 def extractFeatures(ecg_leads, frequency):
-    detectors = Detectors(frequency)    
-
-    # Initialisierung der Feature-Arrays für Stationary Wavelet Transform Detector Detecto 
-    sdnn_swt = np.array([])                                       
-    hr_swt = np.array([])                                  
-    pNN20_swt = np.array([])                                  
-    pNN50_swt = np.array([])      
-    fAnalysis_swt = np.array([])   
-
     # Signale verarbeitung
     hrv_class = HRV(frequency)
+    detectors = Detectors(frequency)    
 
-    arr = np.zeros((len(ecg_leads),6))
-    print("Ecg leads to prapare: {}".format(len(ecg_leads)))
-    for idx, ecg_lead in enumerate(ecg_leads): 
+    detections = np.zeros((len(ecg_leads),8))
+
+    for idx, ecg_lead in enumerate(ecg_leads):    
         r_peaks_swt = detectors.swt_detector(ecg_lead)              # Detektion der QRS-Komplexe mit Stationary Wavelet Transform Detector
 
     #   sdnn_swt = np.std(np.diff(r_peaks_swt)/fs*1000)             # Berechnung der Standardabweichung der Schlag-zu-Schlag Intervalle (SDNN) in Millisekunden - Stationary Wavelet Transform
@@ -37,20 +29,25 @@ def extractFeatures(ecg_leads, frequency):
         sdsd_swt = hrv_class.SDSD(r_peaks_swt)
         NN20_swt = hrv_class.NN20(r_peaks_swt)
         NN50_swt = hrv_class.NN50(r_peaks_swt)
+        HR_swt_mean = np.mean(hrv_class.HR(r_peaks_swt))
+        succ_diffs_mean = np.mean(hrv_class._succ_diffs(r_peaks_swt))
+        
 
     #   fAnalysis_swt
-        arr[idx][0] = idx
-        arr[idx][1] = sdnn_swt
-        arr[idx][2] = rmssd_swt
-        arr[idx][3] = sdsd_swt
-        arr[idx][4] = NN20_swt
-        arr[idx][5] = NN50_swt  
-
-        if (idx % 1000) == 0:
-            print(str(idx) + "\t Ecg signals processed.")
+        detections[idx][0] = idx
+        detections[idx][1] = sdnn_swt
+        detections[idx][2] = rmssd_swt
+        detections[idx][3] = sdsd_swt
+        detections[idx][4] = NN20_swt
+        detections[idx][5] = NN50_swt
+        detections[idx][6] = HR_swt_mean
+        detections[idx][7] = succ_diffs_mean
         
+        if (idx % 1000) == 0:
+            print(str(idx) + "\t EKG Signale wurden verarbeitet.")
+
     # Save data with pandas
-    df = pd.DataFrame(arr, columns = ['index', 'SDNN', 'RMSSD', 'SDSD', 'NN20', 'NN50'])
+    df = pd.DataFrame(detections, columns = ['index', 'SDNN', 'RMSSD', 'SDSD', 'NN20', 'NN50', 'HR mean', 'SD mean'])
     df.drop(['index'],axis=1, inplace = True)
     df.rename(columns = {'level_0':'index'}, inplace = True)
     df.dropna(inplace=True)

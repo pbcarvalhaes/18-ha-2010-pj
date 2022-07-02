@@ -50,46 +50,17 @@ def predict_labels(ecg_leads: List[np.ndarray], fs: float, ecg_names: List[str],
 
 # ------------------------------------------------------------------------------
 # Euer Code ab hier
-    '''''
-    fs = 300                                                  # Sampling-Frequenz 300 Hz
-    detectors = Detectors(fs)                                 # Initialisierung des QRS-Detektors
-    detections = np.zeros((len(ecg_leads),3))
-    counter = 0
-    for ecg_lead in ecg_leads:
-        r_peaks = detectors.hamilton_detector(ecg_lead)
-        sdnn = np.std(np.diff(r_peaks)/fs*1000)
-        detections[counter][0] = sdnn
-        r_peaks = detectors.two_average_detector(ecg_lead)
-        sdnn = np.std(np.diff(r_peaks)/fs*1000)
-        detections[counter][1] = sdnn
-        r_peaks = detectors.swt_detector(ecg_lead)
-        sdnn = np.std(np.diff(r_peaks)/fs*1000)
-        detections[counter][2] = sdnn
-
-        counter = counter + 1
-        if (counter % 1000)==0:
-            print(str(counter) + "\t Dateien wurden verarbeitet.")
-
-    df = pd.DataFrame(detections, columns=['ham', 'two', 'swt'])
-
-    df['ham'].fillna(df['ham'].mean(),inplace=True)
-    df['two'].fillna(df['two'].mean(),inplace=True)
-    df['swt'].fillna(df['swt'].mean(),inplace=True)
-    '''
-
 
     fs = 300                                                  # Sampling-Frequenz 300 Hz
+
+
+    # Signale verarbeitung
     detectors = Detectors(fs)                                 # Initialisierung des QRS-Detektors
+    hrv_class = HRV(fs)
+    
+
     detections = np.zeros((len(ecg_leads),8))
 
-    
-    # Signale verarbeitung
-    hrv_class = HRV(fs)
-
-    #arr = np.zeros((6000,6))
-    diagnosis = np.zeros(6000,dtype='str')
-
-        
     for idx, ecg_lead in enumerate(ecg_leads):
 
         if len(ecg_lead) != 18000:                                  # Length normalization
@@ -123,7 +94,6 @@ def predict_labels(ecg_leads: List[np.ndarray], fs: float, ecg_names: List[str],
         detections[idx][6] = HR_swt_mean
         detections[idx][7] = succ_diffs_mean
         
-        diagnosis[idx] = ecg_labels[idx]
         if (idx % 1000) == 0:
             print(str(idx) + "\t EKG Signale wurden verarbeitet.")
 
@@ -131,7 +101,6 @@ def predict_labels(ecg_leads: List[np.ndarray], fs: float, ecg_names: List[str],
     df = pd.DataFrame(detections, columns = ['index', 'SDNN', 'RMSSD', 'SDSD', 'NN20', 'NN50', 'HR mean', 'SD mean'])
     df.drop(['index'],axis=1, inplace = True)
     df.rename(columns = {'level_0':'index'}, inplace = True)
-    df['diagnosis'] = diagnosis
     df.dropna(inplace=True)
 
 
@@ -140,26 +109,6 @@ def predict_labels(ecg_leads: List[np.ndarray], fs: float, ecg_names: List[str],
 #   -----------------------------------------------------------------------------------------
 #   Start Machine Learning
 
-    '''''
-    model = xgb.XGBClassifier()
-    model.load_model("model.txt")
-
-    encoder = LabelEncoder()
-    encoder.classes_ = np.load('encoder.npy', allow_pickle=True)
-
-    y_pred = model.predict(df)
-    y_pred = encoder.inverse_transform(y_pred)
-    predictions = []
-    counter = 0
-    for row in y_pred:
-        predictions.append(
-            (
-                ecg_names[counter],
-                row
-            )
-        )
-        counter += 1
-    '''
     path = "./models/{foo}".format(foo = model_name)
 
     if model_name == "XGB_model.txt" or model_name =="XGB_model2.txt":
