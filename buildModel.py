@@ -81,13 +81,8 @@ X, y = oversample.fit_resample(X, y)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,random_state=42)
 
-<<<<<<< HEAD
 # RandomForest model 1
 clf = RandomForestClassifier(n_estimators=28,max_depth=25,bootstrap=True,min_samples_leaf=1, class_weight="balanced")
-=======
-# RandomForest model
-clf = RandomForestClassifier(n_estimators=29,max_depth=30,bootstrap=True,min_samples_leaf=1, class_weight="balanced")
->>>>>>> 02694bd4c7050e772b54f4e156c3f6e2a75ec134
 clf.fit(X_train,y_train)
 y_pred = clf.predict(X_test)
 print("RF Hyperparameter selected ")
