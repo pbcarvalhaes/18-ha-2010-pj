@@ -6,53 +6,15 @@ import numpy as np
 from ecgdetectors import Detectors
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
 import xgboost as xgb
 from sklearn.preprocessing import LabelEncoder
 from prepareEcgLeads import load_references_normal, load_alternative_encoder, load_references_arrhythmia
-from hrv import HRV
-from ecgdetectors import Detectors
 
+import sys
+sys.path.append("../18-ha-2010-pj_Team_PMR")
+from dataPrep import extractFeatures
 
-def extractFeatures(ecg_leads, frequency):
-    # Signale verarbeitung
-    hrv_class = HRV(frequency)
-    detectors = Detectors(frequency)    
-
-    detections = np.zeros((len(ecg_leads),8))
-
-    for idx, ecg_lead in enumerate(ecg_leads):    
-        r_peaks_swt = detectors.swt_detector(ecg_lead)              # Detektion der QRS-Komplexe mit Stationary Wavelet Transform Detector
-
-    #   sdnn_swt = np.std(np.diff(r_peaks_swt)/fs*1000)             # Berechnung der Standardabweichung der Schlag-zu-Schlag Intervalle (SDNN) in Millisekunden - Stationary Wavelet Transform
-        sdnn_swt = hrv_class.SDNN(r_peaks_swt, True)
-        rmssd_swt = hrv_class.RMSSD(r_peaks_swt)
-        sdsd_swt = hrv_class.SDSD(r_peaks_swt)
-        NN20_swt = hrv_class.NN20(r_peaks_swt)
-        NN50_swt = hrv_class.NN50(r_peaks_swt)
-        HR_swt_mean = np.mean(hrv_class.HR(r_peaks_swt))
-        succ_diffs_mean = np.mean(hrv_class._succ_diffs(r_peaks_swt))
-        
-
-    #   fAnalysis_swt
-        detections[idx][0] = idx
-        detections[idx][1] = sdnn_swt
-        detections[idx][2] = rmssd_swt
-        detections[idx][3] = sdsd_swt
-        detections[idx][4] = NN20_swt
-        detections[idx][5] = NN50_swt
-        detections[idx][6] = HR_swt_mean
-        detections[idx][7] = succ_diffs_mean
-        
-        if (idx % 1000) == 0:
-            print(str(idx) + "\t EKG Signale wurden verarbeitet.")
-
-    # Save data with pandas
-    df = pd.DataFrame(detections, columns = ['index', 'SDNN', 'RMSSD', 'SDSD', 'NN20', 'NN50', 'HR mean', 'SD mean'])
-    df.drop(['index'],axis=1, inplace = True)
-    df.rename(columns = {'level_0':'index'}, inplace = True)
-    df.dropna(inplace=True)
-
-    return df
 
 def printScore(y_pred, modelName:str = "No model Explicited"):
     counter = {
@@ -103,6 +65,15 @@ def testRFmodel(df, modelfilepath:str, modelName:str = "No XGB model Explicited"
     
     printScore(y_pred, modelName)
 
+def testNNmodel(df, modelfilepath:str, modelName:str = "No XGB model Explicited"):
+    start_time = time.time()
+    model = MLPClassifier()
+    model = pickle.load(open(modelfilepath, 'rb'))
+
+    y_pred = model.predict(df)
+    
+    printScore(y_pred, modelName)
+
 #   -----------------------------------------------------------------------------------------
 #   Start Data preparation
 start_time = time.time()
@@ -112,10 +83,10 @@ arr = load_references_arrhythmia()
 ecg_labels = np.append(normal[1], arr[1], axis=0)
 
 
-df = extractFeatures(normal[0],128)
+df = extractFeatures(normal[0],128, False)
 del normal
 gc.collect()
-df1 = extractFeatures(arr[0],360)
+df1 = extractFeatures(arr[0],360, False)
 df = pd.concat([df, df1], axis=0)
 del arr
 del df1
@@ -134,3 +105,4 @@ testXGBmodel(df,modelfilepath="models/XGB_model.txt", modelName="XGB hyperparame
 testXGBmodel(df,modelfilepath="models/XGB_model2.txt", modelName="XGB no hyperparameter selected")
 testRFmodel(df,modelfilepath="models/RF_model.pkl", modelName="RF hyperparameter selected")
 testRFmodel(df,modelfilepath="models/RF_model2.pkl", modelName="RF no hyperparameter selected")
+testNNmodel(df,modelfilepath="models/NN.pkl", modelName="NN selected")
