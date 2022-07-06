@@ -1,9 +1,7 @@
 import gc
 import pickle
 import time
-import matplotlib.pyplot as plt
 import numpy as np
-from ecgdetectors import Detectors
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
