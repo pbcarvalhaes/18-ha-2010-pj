@@ -59,9 +59,13 @@ def extractFeatures(ecg_leads, fs, leadLengthNormalizer=True):
             ecg_lead = normalizeLead(ecg_lead)
 
         # getting libraries classes
-        r_peaks_swt = detectors.swt_detector(ecg_lead)
-        nkTime = nk.hrv_time(r_peaks_swt, sampling_rate=fs)
-        nkFreq = nk.hrv_frequency(r_peaks_swt, sampling_rate=fs)
+        try: 
+            r_peaks_swt = detectors.swt_detector(ecg_lead)
+            nkTime = nk.hrv_time(r_peaks_swt, sampling_rate=fs)
+            nkFreq = nk.hrv_frequency(r_peaks_swt, sampling_rate=fs)
+        except:
+            print("Ecg lead {} was skipped.".format(idx))
+            continue
 
 
         # calling each feature method and sending every parameter to extract desired feature
@@ -83,7 +87,6 @@ def extractFeatures(ecg_leads, fs, leadLengthNormalizer=True):
 
     # Save data with pandas
     df = pd.DataFrame(arr)
-    df.drop(['index'], axis=1, inplace=True)
-    df.rename(columns={'level_0': 'index'}, inplace=True)
+    df.fillna(value=0,inplace=True)
 
     return df
