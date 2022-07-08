@@ -3,6 +3,7 @@ import pandas as pd
 
 from ecgdetectors import Detectors
 from hrv import HRV
+from sqlalchemy import except_
 
 
 def normalizeLead(ecg_lead):
@@ -45,12 +46,18 @@ def extractFeatures(ecg_leads, fs, leadLengthNormalizer=True):
         r_peaks_swt = detectors.swt_detector(ecg_lead)
 
         # calling each feature method and sending every parameter to extract desired feature
+        leadElements = {
+            "ecg_lead": ecg_lead,
+            "r_peaks_swt": r_peaks_swt,
+        }
         for i in range(nfeatures):
-            leadElements = {
-                "ecg_lead": ecg_lead,
-                "r_peaks_swt": r_peaks_swt,
-            }
-            arr[idx][i] = feautures[i](leadElements)
+            # saving each feature on array of leads' features
+            try:
+                arr[idx][i] = feautures[i](leadElements)
+                if (arr[idx][i] == np.NaN):
+                    arr[idx][i] = 0
+            except:  # setting 0 when feature is not available
+                arr[idx][i] = 0
 
         if (idx % 1000) == 0:
             print(str(idx) + "\t EKG Signale wurden verarbeitet.")
