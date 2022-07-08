@@ -8,20 +8,22 @@ from hrv import HRV
 def extractFeatures(ecg_leads, fs, leadLengthNormalizer = True):
     detectors = Detectors(fs)
 
-    # Initialisierung der Feature-Arrays für Stationary Wavelet Transform Detector Detecto
+    # pre allocating features arrays
     sdnn_swt = np.array([])
     hr_swt = np.array([])
     pNN20_swt = np.array([])
     pNN50_swt = np.array([])
     fAnalysis_swt = np.array([])
 
-    # Signale verarbeitung
-    hrv_class = HRV(fs)
-
+    # array with features of each lead
     arr = np.zeros((len(ecg_leads), 9))
 
-    for idx, ecg_lead in enumerate(ecg_leads):
+    # features extractors calsses
+    hrv_class = HRV(fs)
 
+    # looping though leads
+    for idx, ecg_lead in enumerate(ecg_leads):
+        # normalizating leads length
         if (len(ecg_lead) != 18000 and leadLengthNormalizer):                                  # Length normalization
             m = 18000 // len(ecg_lead)
             new_ecg_lead = ecg_lead
@@ -31,6 +33,7 @@ def extractFeatures(ecg_leads, fs, leadLengthNormalizer = True):
             new_ecg_lead = np.append(new_ecg_lead, ecg_lead[:r])
             ecg_lead = new_ecg_lead
 
+
         min_ecg = np.amin(ecg_lead)
         max_ecg = np.amax(ecg_lead)
         mean_ecg = np.mean(ecg_lead)
@@ -39,7 +42,7 @@ def extractFeatures(ecg_leads, fs, leadLengthNormalizer = True):
         max_mod = max_ecg/mean_ecg
         mean_mod = mean_ecg/(max_ecg-min_ecg)
 
-        # Detektion der QRS-Komplexe mit Stationary Wavelet Transform Detector
+        # extarcting features
         r_peaks_swt = detectors.swt_detector(ecg_lead)
 
     #   sdnn_swt = np.std(np.diff(r_peaks_swt)/fs*1000)             # Berechnung der Standardabweichung der Schlag-zu-Schlag Intervalle (SDNN) in Millisekunden - Stationary Wavelet Transform
@@ -49,7 +52,7 @@ def extractFeatures(ecg_leads, fs, leadLengthNormalizer = True):
         NN20_swt = hrv_class.NN20(r_peaks_swt)
         NN50_swt = hrv_class.NN50(r_peaks_swt)
 
-    #   fAnalysis_swt
+    #   saving features
         arr[idx][0] = idx
         arr[idx][1] = sdnn_swt
         arr[idx][2] = rmssd_swt
@@ -61,7 +64,7 @@ def extractFeatures(ecg_leads, fs, leadLengthNormalizer = True):
         arr[idx][8] = mean_mod
 
         if (idx % 1000) == 0:
-            print(str(idx) + "\t EKG Signale wurden verarbeitet.")
+            print(str(idx) + "\t ecg signals processed")
 
     # Save data with pandas
     df = pd.DataFrame(arr, columns=['index', 'SDNN', 'RMSSD', 'SDSD',
