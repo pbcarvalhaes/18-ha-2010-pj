@@ -22,9 +22,6 @@ from sklearn.preprocessing import LabelEncoder
 from dataPrep import extractFeatures
 
 
-# Signatur der Methode (Parameter und Anzahl return-Werte) darf nicht verändert werden
-
-
 def predict_labels(ecg_leads: List[np.ndarray], fs: float, ecg_names: List[str], model_name: str = 'model.npy', is_binary_classifier: bool = False) -> List[Tuple[str, str]]:
     '''
     Parameters
@@ -52,7 +49,7 @@ def predict_labels(ecg_leads: List[np.ndarray], fs: float, ecg_names: List[str],
 # Euer Code ab hier
 
     fs = 300  # Sampling-Frequenz 300 Hz
-    df = extractFeatures(ecg_leads, fs)
+    df = extractFeatures(ecg_leads, fs)  # getting features from leads
 
 
 #   End Data Preparation
@@ -61,6 +58,7 @@ def predict_labels(ecg_leads: List[np.ndarray], fs: float, ecg_names: List[str],
 
     path = "./models/{foo}".format(foo=model_name)
 
+    # calling the right modedl for different types
     if model_name == "XGB_model.txt" or model_name == "XGB_model2.txt":
         model = xgb.XGBClassifier()
         model.load_model(path)
