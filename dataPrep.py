@@ -3,7 +3,7 @@ import pandas as pd
 
 from ecgdetectors import Detectors
 from hrv import HRV
-from sqlalchemy import except_
+import neurokit2 as nk
 
 
 def normalizeLead(ecg_lead):
@@ -32,7 +32,23 @@ def extractFeatures(ecg_leads, fs, leadLengthNormalizer=True):
         lambda obj: hrv_class.SDSD(obj["r_peaks_swt"]),
         lambda obj: hrv_class.NN20(obj["r_peaks_swt"]),
         lambda obj: hrv_class.NN50(obj["r_peaks_swt"]),
-
+        lambda obj: obj["nkTime"]["HRV_MeanNN"],
+        lambda obj: obj["nkTime"]["HRV_SDNN"],
+        lambda obj: obj["nkTime"]["HRV_RMSSD"],
+        lambda obj: obj["nkTime"]["HRV_SDSD"],
+        lambda obj: obj["nkTime"]["HRV_CVNN"],
+        lambda obj: obj["nkTime"]["HRV_pNN50"],
+        lambda obj: obj["nkTime"]["HRV_pNN20"],
+        lambda obj: obj["nkTime"]["HRV_MedianNN"],
+        lambda obj: obj["nkTime"]["HRV_CVSD"],
+        lambda obj: obj["nkTime"]["HRV_HTI"],
+        lambda obj: obj["nkTime"]["HRV_IQRNN"],
+        lambda obj: obj["nkTime"]["HRVHRV_MCVNN_VLF"],
+        lambda obj: obj["nkTime"]["HRV_MadNN"],
+        lambda obj: obj["nkFreq"]["HRV_VLF"],
+        lambda obj: obj["nkFreq"]["HRV_LF"],
+        lambda obj: obj["nkFreq"]["HRV_HF"],
+        lambda obj: obj["nkFreq"]["HRV_VHF"],
     ]
     nfeatures = len(feautures)
 
@@ -42,20 +58,23 @@ def extractFeatures(ecg_leads, fs, leadLengthNormalizer=True):
         if (leadLengthNormalizer):
             ecg_lead = normalizeLead(ecg_lead)
 
-        # Detektion der QRS-Komplexe mit Stationary Wavelet Transform Detector
+        # getting libraries classes
         r_peaks_swt = detectors.swt_detector(ecg_lead)
+        nkTime = nk.hrv_time(r_peaks_swt, sampling_rate=fs)
+        nkFreq = nk.hrv_frequency(r_peaks_swt, sampling_rate=fs)
+
 
         # calling each feature method and sending every parameter to extract desired feature
         leadElements = {
             "ecg_lead": ecg_lead,
             "r_peaks_swt": r_peaks_swt,
+            "nkTime" : nkTime,
+            "nkFreq" : nkFreq,
         }
         for i in range(nfeatures):
             # saving each feature on array of leads' features
             try:
                 arr[idx][i] = feautures[i](leadElements)
-                if (arr[idx][i] == np.NaN):
-                    arr[idx][i] = 0
             except:  # setting 0 when feature is not available
                 arr[idx][i] = 0
 
