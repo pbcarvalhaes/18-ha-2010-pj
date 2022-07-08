@@ -18,6 +18,8 @@ from typing import List, Tuple
 import xgboost as xgb
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
+from sklearn.neural_network import MLPClassifier
+
 
 from dataPrep import extractFeatures
 
@@ -93,6 +95,23 @@ def predict_labels(ecg_leads: List[np.ndarray], fs: float, ecg_names: List[str],
                 )
             )
             counter += 1
+    elif model_name == "NN.pkl":
+        model = MLPClassifier()
+        model = pickle.load(open(path, 'rb'))
+
+        y_pred = model.predict(df)
+        predictions = []
+        counter = 0
+        for row in y_pred:
+            predictions.append(
+                (
+                    ecg_names[counter],
+                    row
+                )
+            )
+
+
+
 
 # ------------------------------------------------------------------------------
     # Liste von Tupels im Format (ecg_name,label) - Muss unverändert bleiben!
