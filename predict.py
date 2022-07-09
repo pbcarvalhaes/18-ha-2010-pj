@@ -110,9 +110,6 @@ def predict_labels(ecg_leads: List[np.ndarray], fs: float, ecg_names: List[str],
                 )
             )
 
-
-
-
 # ------------------------------------------------------------------------------
     # Liste von Tupels im Format (ecg_name,label) - Muss unverändert bleiben!
     return predictions

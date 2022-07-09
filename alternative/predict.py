@@ -1,12 +1,17 @@
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+import pandas as pd
 import gc
 import pickle
 import time
-import numpy as np
-import pandas as pd
+
+from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 import xgboost as xgb
 from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import f1_score,accuracy_score, confusion_matrix
 from prepareEcgLeads import load_references_normal, load_alternative_encoder, load_references_arrhythmia
 
 import sys
@@ -38,7 +43,24 @@ def printScore(y_pred, modelName:str = "No model Explicited"):
     print(modelName)
     print("Total right: ", counter['right'])
     print("Total wrong: ", counter['wrong'])
-    print("Accuracy: ", counter["right"]/(counter["right"]+counter["wrong"]))
+    print("Accuracy: ", accuracy_score(ecg_labels, y_pred))
+    print("F1: ", f1_score(ecg_labels, y_pred,average='weighted'))
+    
+    cf_matrix = confusion_matrix(ecg_labels, y_pred)
+    ax = sns.heatmap(cf_matrix/np.sum(cf_matrix), annot=True, cmap='Blues')
+
+    ax.set_title('Seaborn Confusion Matrix with labels\n\n');
+    ax.set_xlabel('\nPredicted Values')
+    ax.set_ylabel('Actual Values ');
+
+    ## Ticket labels - List must be in alphabetical order
+    ax.xaxis.set_ticklabels(['False','True'])
+    ax.yaxis.set_ticklabels(['False','True'])
+
+    ## Display the visualization of the Confusion Matrix.
+    plt.show()
+
+
     print("--- %s seconds ---" % (time.time() - start_time))
 
 def testXGBmodel(df, modelfilepath:str, modelName:str = "No XGB model Explicited"):
